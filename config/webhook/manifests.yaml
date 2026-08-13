@@ -1,0 +1,46 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-polls-jef-app-v1-poll
+  failurePolicy: Fail
+  name: vpoll-v1.kb.io
+  rules:
+  - apiGroups:
+    - polls.jef.app
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - polls
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-polls-jef-app-v1-pollresponse
+  failurePolicy: Fail
+  name: vpollresponse-v1.kb.io
+  rules:
+  - apiGroups:
+    - polls.jef.app
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pollresponses
+  sideEffects: None

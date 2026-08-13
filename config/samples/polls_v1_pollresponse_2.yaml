@@ -1,0 +1,21 @@
+apiVersion: polls.jef.app/v1
+kind: PollResponse
+metadata:
+  labels:
+    app.kubernetes.io/name: poll-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: pollresponse-sample-2
+spec:
+  pollRef:
+    name: poll-sample
+  respondent: bob@example.com
+  answers:
+    - questionID: language
+      selectedOptions:
+        - rust
+    - questionID: reasons
+      selectedOptions:
+        - performance
+        - ergonomics
+    - questionID: comments
+      text: Borrow checker keeps me honest.

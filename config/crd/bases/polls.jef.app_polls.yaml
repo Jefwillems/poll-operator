@@ -1,0 +1,303 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.21.0
+  name: polls.polls.jef.app
+spec:
+  group: polls.jef.app
+  names:
+    kind: Poll
+    listKind: PollList
+    plural: polls
+    singular: poll
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    - jsonPath: .spec.title
+      name: Title
+      type: string
+    - jsonPath: .status.totalResponses
+      name: Responses
+      type: integer
+    - jsonPath: .spec.closesAt
+      name: Closes-At
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: Poll is the Schema for the polls API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: spec defines the desired state of Poll
+            properties:
+              closesAt:
+                description: |-
+                  closesAt is the time at which the Poll stops accepting votes.
+                  If unset, the Poll remains open until explicitly closed.
+                format: date-time
+                type: string
+              questions:
+                description: |-
+                  questions is the ordered list of questions the Poll asks.
+                  Each question must have a unique id.
+                items:
+                  description: PollQuestion defines a single question within a Poll.
+                  properties:
+                    choice:
+                      description: |-
+                        choice holds configuration for Choice-type questions.
+                        Must be set when type is Choice and must be unset otherwise.
+                      properties:
+                        allowMultipleChoices:
+                          default: false
+                          description: allowMultipleChoices controls whether a voter
+                            may select more than one option.
+                          type: boolean
+                        options:
+                          description: |-
+                            options is the set of choices voters may select from.
+                            At least two options are required.
+                          items:
+                            type: string
+                          maxItems: 20
+                          minItems: 2
+                          type: array
+                          x-kubernetes-list-type: atomic
+                      required:
+                      - options
+                      type: object
+                    freeText:
+                      description: |-
+                        freeText holds configuration for FreeText-type questions.
+                        Must be set when type is FreeText and must be unset otherwise.
+                      properties:
+                        maxResponseLength:
+                          default: 1000
+                          description: maxResponseLength caps the length of an accepted
+                            response, in characters.
+                          format: int32
+                          maximum: 10000
+                          minimum: 1
+                          type: integer
+                      type: object
+                    id:
+                      description: |-
+                        id is a stable identifier for this question, unique within the Poll.
+                        It is used to correlate spec entries with status results and must not
+                        change after the Poll is created.
+                      maxLength: 63
+                      minLength: 1
+                      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                      type: string
+                    prompt:
+                      description: prompt is the question text shown to voters.
+                      maxLength: 500
+                      minLength: 1
+                      type: string
+                    type:
+                      description: |-
+                        type selects the question format. Choice questions require options;
+                        FreeText questions accept an arbitrary text response.
+                      enum:
+                      - Choice
+                      - FreeText
+                      type: string
+                  required:
+                  - id
+                  - prompt
+                  - type
+                  type: object
+                maxItems: 50
+                minItems: 1
+                type: array
+                x-kubernetes-list-map-keys:
+                - id
+                x-kubernetes-list-type: map
+              title:
+                description: title is a short human-readable name for the Poll.
+                maxLength: 200
+                minLength: 1
+                type: string
+            required:
+            - questions
+            - title
+            type: object
+          status:
+            description: status defines the observed state of Poll
+            properties:
+              closedAt:
+                description: closedAt records when the Poll transitioned to the Closed
+                  phase.
+                format: date-time
+                type: string
+              conditions:
+                description: |-
+                  conditions represent the current state of the Poll resource.
+                  Each condition has a unique type and reflects the status of a specific aspect of the resource.
+
+                  Standard condition types include:
+                  - "Available": the resource is fully functional
+                  - "Progressing": the resource is being created or updated
+                  - "Degraded": the resource failed to reach or maintain its desired state
+
+                  The status of each condition is one of True, False, or Unknown.
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              openedAt:
+                description: openedAt records when the Poll transitioned to the Open
+                  phase.
+                format: date-time
+                type: string
+              phase:
+                description: phase reports the current lifecycle phase of the Poll.
+                enum:
+                - Pending
+                - Open
+                - Closed
+                type: string
+              results:
+                description: results reports per-question aggregated responses.
+                items:
+                  description: QuestionResult reports aggregated responses for a single
+                    question.
+                  properties:
+                    options:
+                      description: |-
+                        options reports per-option vote tallies for Choice questions.
+                        Empty for FreeText questions.
+                      items:
+                        description: OptionResult reports the vote count for a single
+                          Choice option.
+                        properties:
+                          option:
+                            description: option is the choice text, matching an entry
+                              in the question's options.
+                            type: string
+                          votes:
+                            description: votes is the number of votes recorded for
+                              this option.
+                            format: int32
+                            minimum: 0
+                            type: integer
+                        required:
+                        - option
+                        - votes
+                        type: object
+                      type: array
+                      x-kubernetes-list-map-keys:
+                      - option
+                      x-kubernetes-list-type: map
+                    questionID:
+                      description: questionID matches the id of a question in spec.questions.
+                      type: string
+                    responses:
+                      description: |-
+                        responses is the number of responses recorded for this question.
+                        For Choice questions this counts voters; for FreeText questions this
+                        counts submitted texts.
+                      format: int32
+                      minimum: 0
+                      type: integer
+                  required:
+                  - questionID
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - questionID
+                x-kubernetes-list-type: map
+              totalResponses:
+                description: |-
+                  totalResponses is the number of voters who have submitted a response
+                  to at least one question.
+                format: int32
+                minimum: 0
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

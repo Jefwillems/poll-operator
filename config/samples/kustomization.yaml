@@ -1,0 +1,6 @@
+## Append samples of your project ##
+resources:
+- polls_v1_poll.yaml
+- polls_v1_pollresponse.yaml
+- polls_v1_pollresponse_2.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

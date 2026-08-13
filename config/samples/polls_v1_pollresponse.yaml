@@ -1,0 +1,21 @@
+apiVersion: polls.jef.app/v1
+kind: PollResponse
+metadata:
+  labels:
+    app.kubernetes.io/name: poll-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: pollresponse-sample
+spec:
+  pollRef:
+    name: poll-sample
+  respondent: alice@example.com
+  answers:
+    - questionID: language
+      selectedOptions:
+        - go
+    - questionID: reasons
+      selectedOptions:
+        - performance
+        - tooling
+    - questionID: comments
+      text: The compiler errors are actually helpful.

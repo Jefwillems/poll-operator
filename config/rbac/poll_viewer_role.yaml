@@ -1,0 +1,29 @@
+# This rule is not used by the project poll-operator itself.
+# It is provided to allow the cluster admin to help manage permissions for users.
+#
+# Grants read-only access to polls.jef.app resources.
+# This role is intended for users who need visibility into these resources
+# without permissions to modify them. It is ideal for monitoring purposes and limited-access viewing.
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: poll-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: poll-viewer-role
+rules:
+- apiGroups:
+  - polls.jef.app
+  resources:
+  - polls
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - polls.jef.app
+  resources:
+  - polls/status
+  verbs:
+  - get

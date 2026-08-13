@@ -1,0 +1,30 @@
+{{define "index.html"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} — poll-operator</title>
+  {{template "styles"}}
+</head>
+<body>
+  <main>
+    {{template "flash" .}}
+    <h1>Polls</h1>
+    {{if .Polls}}
+      <ul class="poll-list">
+      {{range .Polls}}
+        <li>
+          <div>
+            <a href="/polls/{{.Namespace}}/{{.Name}}"><strong>{{.Title}}</strong></a>
+            <div class="meta">{{.Namespace}} / {{.Name}} · {{.TotalResponses}} response{{if ne .TotalResponses 1}}s{{end}}</div>
+          </div>
+          <span class="phase {{if eq .Phase "Open"}}open{{else if eq .Phase "Closed"}}closed{{end}}">{{if .Phase}}{{.Phase}}{{else}}Pending{{end}}</span>
+        </li>
+      {{end}}
+      </ul>
+    {{else}}
+      <p>No polls found. Try <code>kubectl apply -k config/samples/</code>.</p>
+    {{end}}
+  </main>
+</body>
+</html>{{end}}

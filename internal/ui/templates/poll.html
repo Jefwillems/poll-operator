@@ -1,0 +1,81 @@
+{{define "poll.html"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} — poll-operator</title>
+  {{template "styles"}}
+</head>
+<body>
+  {{template "nav" .}}
+  <main>
+    {{template "flash" .}}
+
+    <h1>{{.Poll.Spec.Title}}</h1>
+    <div class="meta">
+      {{.Poll.Namespace}} / {{.Poll.Name}} ·
+      <span class="phase {{if eq (printf "%s" .Poll.Status.Phase) "Open"}}open{{else if eq (printf "%s" .Poll.Status.Phase) "Closed"}}closed{{end}}">
+        {{if .Poll.Status.Phase}}{{.Poll.Status.Phase}}{{else}}Pending{{end}}
+      </span>
+      · {{.Poll.Status.TotalResponses}} response{{if ne .Poll.Status.TotalResponses 1}}s{{end}}
+      {{if .Poll.Spec.ClosesAt}}· closes at {{.Poll.Spec.ClosesAt}}{{end}}
+    </div>
+
+    <h2>Results</h2>
+    {{range .Questions}}
+      <fieldset>
+        <legend>{{.Prompt}}</legend>
+        {{if eq (printf "%s" .Type) "Choice"}}
+          <ul class="results">
+            {{$max := maxVotes .Options}}
+            {{range .Options}}
+              <li>
+                <span>{{.Option}}</span>
+                <span class="bar" style="width: {{barWidth .Votes $max}}%"></span>
+                <span>{{.Votes}}</span>
+              </li>
+            {{end}}
+          </ul>
+        {{else}}
+          <p>{{.TextResponses}} free-text response{{if ne .TextResponses 1}}s{{end}}</p>
+        {{end}}
+      </fieldset>
+    {{end}}
+
+    {{if .IsOpen}}
+      <h2>Cast a vote</h2>
+      <form method="POST" action="/polls/{{.Poll.Namespace}}/{{.Poll.Name}}/vote">
+        <label>
+          Your name (optional)
+          <input type="text" name="respondent" maxlength="253" autocomplete="off">
+        </label>
+
+        {{range .Questions}}
+          <fieldset>
+            <legend>{{.Prompt}}</legend>
+            {{if eq (printf "%s" .Type) "Choice"}}
+              {{$qid := .ID}}
+              {{$multi := .AllowMultiple}}
+              {{range .Options}}
+                <label class="choice">
+                  {{if $multi}}
+                    <input type="checkbox" name="q.{{$qid}}" value="{{.Option}}"> {{.Option}}
+                  {{else}}
+                    <input type="radio" name="q.{{$qid}}" value="{{.Option}}"> {{.Option}}
+                  {{end}}
+                </label>
+              {{end}}
+            {{else}}
+              <textarea name="q.{{.ID}}" rows="3" {{if .MaxLength}}maxlength="{{.MaxLength}}"{{end}}></textarea>
+            {{end}}
+          </fieldset>
+        {{end}}
+
+        <button type="submit">Submit response</button>
+      </form>
+    {{else}}
+      <p><em>This poll is not accepting responses.</em></p>
+    {{end}}
+  </main>
+</body>
+</html>{{end}}

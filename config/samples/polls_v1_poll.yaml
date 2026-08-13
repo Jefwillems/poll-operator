@@ -1,0 +1,37 @@
+apiVersion: polls.jef.app/v1
+kind: Poll
+metadata:
+  labels:
+    app.kubernetes.io/name: poll-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: poll-sample
+spec:
+  title: Favourite programming language
+  # Uncomment to auto-close voting at a specific time.
+  # closesAt: "2030-01-01T00:00:00Z"
+  questions:
+    - id: language
+      prompt: Which language do you reach for first?
+      type: Choice
+      choice:
+        options:
+          - go
+          - rust
+          - python
+          - typescript
+        allowMultipleChoices: false
+    - id: reasons
+      prompt: What do you like about it?
+      type: Choice
+      choice:
+        options:
+          - performance
+          - ergonomics
+          - ecosystem
+          - tooling
+        allowMultipleChoices: true
+    - id: comments
+      prompt: Anything else you want to add?
+      type: FreeText
+      freeText:
+        maxResponseLength: 500
