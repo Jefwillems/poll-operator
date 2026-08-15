@@ -9,3 +9,9 @@
 # Re-include Go module files
 !go.mod
 !go.sum
+
+# Re-include embedded assets (e.g. //go:embed templates in internal/ui)
+!**/*.html
+!**/*.css
+!**/*.js
+!**/*.svg
